@@ -1,0 +1,5 @@
+.streamlit/
+teleco customer churn.csv
+test_gemini.py
+__pycache__/
+*.pyc
