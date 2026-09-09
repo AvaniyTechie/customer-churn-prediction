@@ -708,13 +708,13 @@ You are an AI customer-retention analyst assisting a telecom business.
 
 Analyze the customer using ONLY the information explicitly provided below.
 
-CUSTOMER INFORMATION:
+CUSTOMER PROFILE:
 {customer_context}
 
-ML PREDICTION:
+MACHINE LEARNING ASSESSMENT:
 - Churn probability: {churn_probability:.2f}%
 - Risk level: {risk}
-- Prediction: {prediction[0]}
+- ML prediction: {prediction[0]}
 
 FACTORS PUSHING TOWARD CHURN:
 {actual_churn_drivers}
@@ -723,37 +723,62 @@ FACTORS PUSHING TOWARD STAY:
 {actual_stay_drivers}
 
 IMPORTANT RULES:
-1. Do NOT invent or assume customer information.
-2. Do NOT infer any information that is not explicitly provided.
-3. Always refer to the person as "the customer".
-4. Do not introduce payment methods, services, contracts, or customer characteristics that are not present in the customer information.
-5. Base the explanation primarily on the actual ML model contributions provided above.
-6. Do not claim that a feature causes churn. Say that it contributes to the model's prediction.
-7. Recommendations must be practical and relevant to the customer's actual profile.
-8. Do not recommend unnecessary discounts to low-risk customers.
-9. Do not contradict the ML prediction.
-10. Do not make up numerical values.
-11. Keep the response concise and professional.
-12. If a recommendation requires information that is not available, clearly state that it would require additional business information.
+
+1. Use ONLY the customer information and model contributions provided above.
+2. Do NOT invent or assume customer information.
+3. Do NOT infer age, personality, income, preferences, or other attributes that are not explicitly provided.
+4. Always refer to the person as "the customer" unless a specific attribute is explicitly provided and relevant.
+5. Do not introduce payment methods, services, contracts, discounts, or customer characteristics that are not present in the customer profile.
+6. Base the explanation of risk drivers on the ACTUAL model contributions provided above.
+7. A model contribution indicates how a feature influences the Logistic Regression model's churn score. Do NOT describe a contribution as proof that the feature causes churn.
+8. Clearly distinguish between ML-derived insights and business recommendations.
+9. Recommendations must be practical and relevant to the customer's actual profile.
+10. Do not recommend unnecessary discounts to low-risk customers.
+11. Do not contradict the ML prediction or model contributions.
+12. If the customer is low risk, focus on maintaining satisfaction and loyalty rather than aggressive retention offers.
+13. If the customer is medium or high risk, prioritize practical actions related to the strongest available risk factors.
+14. Do not invent specific prices, discounts, promotional values, or company policies unless they are explicitly provided.
+15. Keep the response concise, professional, and business-oriented.
 
 Return exactly these four sections:
 
 ### 1. Churn Risk Explanation
-Explain the predicted risk using the probability and the strongest model contributions.
+
+Explain the predicted risk using:
+- churn probability
+- risk level
+- ML prediction
+- strongest model contributions
+
+Do not overstate the prediction.
 
 ### 2. Key Risk Drivers
+
 List the 3–5 strongest factors pushing toward churn.
-Include their exact model contributions.
+
+For each factor, include:
+- feature name
+- model contribution
+
+Only use factors from the supplied model contributions.
 
 ### 3. Recommended Retention Actions
-Give 2–3 practical business actions based only on the available customer information.
+
+Give 2–3 practical business actions based ONLY on the customer's actual profile and the model-derived risk factors.
+
+Recommendations should be appropriate to the customer's risk level.
+
+Do not invent discounts or offers.
 
 ### 4. Personalized Retention Strategy
-Create one concise retention strategy based primarily on the customer's strongest churn-risk factors and current services. Prioritize practical actions related to tenure, contract, internet service, payment method, and subscribed services when relevant.
+
+Provide one concise strategy tailored specifically to this customer's actual profile.
+
+The strategy should connect the strongest risk factors with appropriate retention actions.
 
 Remember:
 This is a probabilistic ML prediction, not a certainty.
-Do not invent information.
+Model contributions indicate influence on the model's prediction, not causation.
 """
 
     # =====================================================
@@ -777,26 +802,19 @@ Do not invent information.
         try:
 
             response = client.models.generate_content(
-                model="gemini-3.6-flash",
+                model="gemini-3.7-flash",
                 contents=prompt
             )
 
             ai_recommendation = response.text
 
-            # Display Gemini response
-            st.markdown(
-                ai_recommendation
-            )
+            st.markdown(ai_recommendation)
 
         except Exception as e:
 
-            st.error(
-                "Unable to generate AI recommendations."
-            )
+            st.error("Unable to generate AI recommendations.")
 
-            st.caption(
-                "Please check your Gemini API configuration."
-            )
+            st.error(f"Gemini API error: {str(e)}")
 
     # =====================================================
     # HOW THE SYSTEM WORKS
