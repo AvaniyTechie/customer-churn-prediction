@@ -656,8 +656,7 @@ if predict_button:
 
 Customer Profile:
 
-Gender: {gender}
-Senior Citizen: {SeniorCitizen}
+Senior Citizen: {"Yes" if SeniorCitizen == 1 else "No"}
 Partner: {Partner}
 Dependents: {Dependents}
 
@@ -705,80 +704,56 @@ ACTUAL MODEL CONTRIBUTIONS REDUCING CHURN RISK:
     # =====================================================
 
     prompt = f"""
+You are an AI customer-retention analyst assisting a telecom business.
 
-You are an expert customer retention analyst.
+Analyze the customer using ONLY the information explicitly provided below.
 
-Your task is to translate a machine-learning churn prediction
-into a concise business recommendation.
-
-Here is the customer information:
-
+CUSTOMER INFORMATION:
 {customer_context}
 
+ML PREDICTION:
+- Churn probability: {churn_probability:.2f}%
+- Risk level: {risk}
+- Prediction: {prediction[0]}
+
+FACTORS PUSHING TOWARD CHURN:
+{actual_churn_drivers}
+
+FACTORS PUSHING TOWARD STAY:
+{actual_stay_drivers}
 
 IMPORTANT RULES:
+1. Do NOT invent or assume customer information.
+2. Do NOT infer any information that is not explicitly provided.
+3. Always refer to the person as "the customer".
+4. Do not introduce payment methods, services, contracts, or customer characteristics that are not present in the customer information.
+5. Base the explanation primarily on the actual ML model contributions provided above.
+6. Do not claim that a feature causes churn. Say that it contributes to the model's prediction.
+7. Recommendations must be practical and relevant to the customer's actual profile.
+8. Do not recommend unnecessary discounts to low-risk customers.
+9. Do not contradict the ML prediction.
+10. Do not make up numerical values.
+11. Keep the response concise and professional.
+12. If a recommendation requires information that is not available, clearly state that it would require additional business information.
 
-1. The Logistic Regression model is responsible for predicting
-   the churn probability.
-
-2. You must NOT change or recalculate the churn probability.
-
-3. Positive model contribution means the feature pushes the
-   model prediction toward churn.
-
-4. Negative model contribution means the feature pushes the
-   model prediction toward staying.
-
-5. Use the actual model contributions provided above as the
-   primary evidence when explaining the prediction.
-
-6. Do not claim that any feature causes churn.
-
-7. Do not invent customer information.
-
-8. Treat the churn probability as an estimated risk,
-   not a certainty.
-
-9. Do not introduce unrelated risk factors.
-
-10. Give practical business recommendations that are relevant
-    to the customer's actual profile.
-
-
-Generate exactly these four sections:
-
+Return exactly these four sections:
 
 ### 1. Churn Risk Explanation
-
-Briefly explain why the model classified this customer
-as Low, Medium, or High Risk.
-
-Use the churn probability and strongest model contributions.
-
+Explain the predicted risk using the probability and the strongest model contributions.
 
 ### 2. Key Risk Drivers
-
-Explain the most important factors increasing churn risk.
-
-Use only the actual model-derived drivers provided.
-
+List the 3–5 strongest factors pushing toward churn.
+Include their exact model contributions.
 
 ### 3. Recommended Retention Actions
-
-Give exactly 3 practical and realistic actions
-the company could take for this customer.
-
+Give 2–3 practical business actions based only on the available customer information.
 
 ### 4. Personalized Retention Strategy
+Create one concise retention strategy based primarily on the customer's strongest churn-risk factors and current services. Prioritize practical actions related to tenure, contract, internet service, payment method, and subscribed services when relevant.
 
-Give one concise strategy that combines the most
-relevant retention actions for this customer.
-
-
-Keep the response professional, concise,
-and suitable for a business dashboard.
-
-Do not repeat the entire customer profile.
+Remember:
+This is a probabilistic ML prediction, not a certainty.
+Do not invent information.
 """
 
     # =====================================================
@@ -860,44 +835,6 @@ Do not repeat the entire customer profile.
             "6️⃣ Gemini generates a human-readable explanation "
             "and personalized retention recommendations."
         )
-
-    # # =====================================================
-    # # FEATURE CONTRIBUTION VISUALIZATION
-    # # =====================================================
-
-    # st.divider()
-
-    # st.header("📊 Model Contribution Overview")
-
-    # st.caption(
-    #     "Positive values push the model toward churn, while "
-    #     "negative values push the model toward staying."
-    # )
-
-    # # Take the 10 strongest contributors
-    # chart_df = contribution_df.head(10).copy()
-
-    # # Sort for easier reading
-    # chart_df = chart_df.sort_values(
-    #     by="Contribution",
-    #     ascending=True
-    # )
-
-    # # Keep only the columns needed for the chart
-    # chart_data = chart_df[
-    #     ["Display Feature", "Contribution"]
-    # ].copy()
-
-    # # Set feature name as index
-    # chart_data = chart_data.set_index(
-    #     "Display Feature"
-    # )
-
-    # # Display chart
-    # st.bar_chart(
-    #     chart_data,
-    #     horizontal=True
-    # )
 
     # =====================================================
     # FOOTER
